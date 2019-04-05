@@ -1,4 +1,6 @@
-﻿using MRMigrationMaster.Infrastructure.Enum;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MRMigrationMaster.Infrastructure.Enum;
 using MRMigrationMaster.Infrastructure.Interface;
 using System;
 using System.Collections.Generic;
@@ -12,10 +14,15 @@ namespace MRMigrationMaster.Infrastructure.Component
         public Action<object, LogType> Log { get; set; }
         public Master Master { get; set; }
 
-        public void Init(Action<object, LogType> log, Master master)
+        protected IServiceCollection _services;
+        protected IConfiguration _configuration;
+
+        public void Init(Action<object, LogType> log, Master master, IServiceCollection services, IConfiguration configuration)
         {
             Log = log;
             Master = master;
+            _services = services;
+            _configuration = configuration;
         }
 
         public abstract Task Action();

@@ -1,4 +1,6 @@
-﻿using MRMigrationMaster.Infrastructure.Attr;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MRMigrationMaster.Infrastructure.Attr;
 using MRMigrationMaster.Infrastructure.Component;
 using MRMigrationMaster.Infrastructure.Enum;
 using MRMigrationMaster.Infrastructure.Interface;
@@ -12,18 +14,24 @@ using Console = Colorful.Console;
 
 namespace MRMigrationMaster
 {
-    public class Master
+    public abstract class Master
     {
-        protected List<MigrationAndMeta> Collection { get; set; }
+        protected List<MigrationAndMeta> _collection { get; set; }
+        protected IConfiguration _configuration { get; set; }
+        protected IServiceCollection _serviceCollection { get; set; }
 
         public Master() { }
 
         public virtual async Task Start()
         {
+            _configuration = ConfigurationInit();
+            _serviceCollection = ServicesInit();
+
             Scan();
+
             Log("Migration master started.", LogType.INFO);
 
-            if (!Collection.Any())
+            if (!_collection.Any())
             {
                 Log("No migrations found.", LogType.DANGER);
             }
@@ -34,10 +42,10 @@ namespace MRMigrationMaster
                     Log($"Select migration to apply", LogType.NONE);
 
                     string input = string.Empty;
-                    for (var i = 0; i < Collection.Count; i++)
+                    for (var i = 0; i < _collection.Count; i++)
                     {
                         var cursor = i + 1;
-                        var data = Collection[i];
+                        var data = _collection[i];
 
                         Log($"{cursor}. [{data.Attr.LastUpdated}] {data.Attr.Name}.", LogType.NONE);
                     }
@@ -54,13 +62,13 @@ namespace MRMigrationMaster
                         if (selected == -1)
                             break;
 
-                        if(selected > Collection.Count)
+                        if(selected > _collection.Count)
                         {
                             Log("Wrong number.", LogType.DANGER);
                             continue;
                         }
 
-                        var data = Collection[selected - 1];
+                        var data = _collection[selected - 1];
 
                         Log($"Start migration {data.Attr.Name}?", LogType.NONE);
                         Log("y/n", LogType.NONE);
@@ -117,7 +125,7 @@ namespace MRMigrationMaster
 
         protected virtual void Scan()
         {
-            Collection = new List<MigrationAndMeta>();
+            _collection = new List<MigrationAndMeta>();
 
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -127,12 +135,15 @@ namespace MRMigrationMaster
                     if (attribs != null && attribs.Length > 0)
                     {
                         var migration = (IMigration)Activator.CreateInstance(type);
-                        migration.Init(Log, this);
+                        migration.Init(Log, this, _serviceCollection, _configuration);
 
-                        Collection.Add(new MigrationAndMeta((MigrationAttr)attribs.First(), migration));
+                        _collection.Add(new MigrationAndMeta((MigrationAttr)attribs.First(), migration));
                     }
                 }
             }
         }
+
+        protected abstract IServiceCollection ServicesInit();
+        protected abstract IConfiguration ConfigurationInit();
     }
 }
