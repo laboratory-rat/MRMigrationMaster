@@ -107,16 +107,16 @@ namespace MRMigrationMaster
                     Console.WriteLine(subject.ToString());
                     break;
                 case LogType.INFO:
-                    Console.Write(subject.ToString(), ConsoleColor.Blue);
+                    Console.WriteLine(subject.ToString(), ConsoleColor.Blue);
                     break;
                 case LogType.WARNING:
-                    Console.Write(subject.ToString(), ConsoleColor.Magenta);
+                    Console.WriteLine(subject.ToString(), ConsoleColor.Magenta);
                     break;
                 case LogType.DANGER:
-                    Console.Write(subject.ToString(), ConsoleColor.Red);
+                    Console.WriteLine(subject.ToString(), ConsoleColor.Red);
                     break;
                 case LogType.SUCCESS:
-                    Console.Write(subject.ToString(), ConsoleColor.Green);
+                    Console.WriteLine(subject.ToString(), ConsoleColor.Green);
                     break;
                 default:
                     break;
