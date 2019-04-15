@@ -81,6 +81,7 @@ namespace MRMigrationMaster
                             {
                                 await data.Migration.Action();
                                 Log($"Migration finished success.", LogType.INFO);
+                                Log(string.Empty, LogType.INFO);
                             }
                             catch (Exception ex)
                             {
